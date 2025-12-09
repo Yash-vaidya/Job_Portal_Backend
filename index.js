@@ -11,14 +11,11 @@ import applicationRoute from "./Routes/application.route.js";
 dotenv.config();
 
 const app = express();
+
+// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-// const corsOptions = {
-//   origin: "http://localhost:5173",
-//   credentials: true,
-// };
 
 app.use(
   cors({
@@ -30,8 +27,6 @@ app.use(
   })
 );
 
-const PORT = process.env.PORT || 8000;
-
 // Routes
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
@@ -39,11 +34,11 @@ app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 
 app.get("/", (req, res) => {
-  res.send("Server is runnning.....");
+  res.send("Server is running...");
 });
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is running at port ${PORT}`);
-  });
-});
+// Connect MongoDB ONLY once
+connectDB();
+
+// 🚀 Vercel serverless export (IMPORTANT)
+export default app;
