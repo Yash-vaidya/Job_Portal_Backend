@@ -1,43 +1,35 @@
+// utils/db.js
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI;
-
-if (!MONGO_URI) {
-  console.error("MONGO_URI not found in .env");
-  process.exit(1);
-}
-
-// Cache the connection for serverless
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
-async function connectDB() {
-  if (cached.conn) {
-    console.log("✅ Using cached MongoDB connection");
-    return cached.conn;
+export default async function connectDB() {
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    console.error("MONGO_URI not found in .env");
+    process.exit(1);
   }
 
-  if (!cached.promise) {
-    const opts = {
+  try {
+    await mongoose.connect(uri, {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
-      bufferCommands: false,
-    };
-
-    cached.promise = mongoose.connect(MONGO_URI, opts).then((mongoose) => {
-      console.log("✅ MongoDB connected");
-      return mongoose;
     });
+
+    console.log("✅ MongoDB connected");
+
+    console.log("Mongoose readyState:", mongoose.connection.readyState);
+    console.log(
+      "Connection host(s):",
+      mongoose.connection.hosts || mongoose.connection.name
+    );
+  } catch (err) {
+    console.error("❌ MongoDB connection error:");
+    console.error(err);
+    if (err?.reason) {
+      console.error("Topology reason:", err.reason);
+    }
+    process.exit(1);
   }
-
-  cached.conn = await cached.promise;
-  return cached.conn;
 }
-
-export default connectDB;
