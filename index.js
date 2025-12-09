@@ -24,13 +24,11 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://job-portal-frontend-jhnz.vercel.app/",
+      "https://job-portal-frontend-jhnz.vercel.app",
     ],
     credentials: true,
   })
 );
-
-app.use(cors(corsOptions));
 
 const PORT = process.env.PORT || 8000;
 
